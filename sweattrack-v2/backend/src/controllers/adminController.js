@@ -1,5 +1,17 @@
 const db = require('../config/database');
 
+function parseNotificationMeta(metaValue) {
+  if (!metaValue) return {};
+  if (typeof metaValue === 'object') return metaValue;
+
+  try {
+    return JSON.parse(metaValue);
+  } catch (err) {
+    console.error('[admin] invalid notification meta:', metaValue);
+    return null;
+  }
+}
+
 exports.listUsers = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -21,13 +33,12 @@ exports.toggleAdmin = async (req, res) => {
   try {
     const targetId = parseInt(req.params.id, 10);
 
-    // Prevent removing own admin
-    if (targetId === req.userId) {
-      return res.status(400).json({ error: 'Não é possível alterar o próprio status de admin' });
-    }
-
-    const [rows] = await db.query('SELECT is_admin, name FROM users WHERE id = ?', [targetId]);
+    const [rows] = await db.query('SELECT is_admin, name, role FROM users WHERE id = ?', [targetId]);
     if (!rows.length) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    if (rows[0].role === 'admin') {
+      return res.status(403).json({ error: 'O perfil ADMIN é protegido e não pode ter o status alterado' });
+    }
 
     const newValue = rows[0].is_admin ? 0 : 1;
     await db.query('UPDATE users SET is_admin = ? WHERE id = ?', [newValue, targetId]);
@@ -66,10 +77,17 @@ exports.handleAdminRequest = async (req, res) => {
     }
 
     const notif = notifs[0];
-    const meta = notif.meta ? JSON.parse(notif.meta) : {};
-    const requesterId = meta.requester_id;
+    const meta = parseNotificationMeta(notif.meta);
 
-    if (!requesterId) return res.status(400).json({ error: 'Metadado inválido' });
+    if (!meta) {
+      return res.status(400).json({ error: 'Metadado inválido' });
+    }
+
+    const requesterId = parseInt(meta.requester_id, 10);
+
+    if (!Number.isInteger(requesterId) || requesterId <= 0) {
+      return res.status(400).json({ error: 'Metadado inválido' });
+    }
 
     if (action === 'approve') {
       await db.query('UPDATE users SET is_admin = 1 WHERE id = ?', [requesterId]);
@@ -93,7 +111,7 @@ exports.handleAdminRequest = async (req, res) => {
 
     res.json({ success: true, action });
   } catch (err) {
-    console.error(err);
+    console.error('[admin] handleAdminRequest failed:', err);
     res.status(500).json({ error: 'Erro ao processar solicitação' });
   }
 };

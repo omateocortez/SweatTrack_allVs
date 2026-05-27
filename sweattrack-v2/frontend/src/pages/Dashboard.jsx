@@ -15,9 +15,11 @@ import Badge from '../components/ui/Badge';
 import HydrationGauge from '../components/charts/HydrationGauge';
 import WeeklyChart from '../components/charts/WeeklyChart';
 import SessionCard from '../components/session/SessionCard';
+import SessionDetailModal from '../components/session/SessionDetailModal';
 import Modal from '../components/ui/Modal';
 import { useToast } from '../components/ui/Toast';
 import { getSweatRateLabel } from '../utils/calculations';
+import { isMobileViewport } from '../utils/device';
 
 const stagger = { animate: { transition: { staggerChildren: 0.07 } } };
 const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const [showNewSession, setShowNewSession] = useState(false);
   const [sessionForm, setSessionForm] = useState({ sessionType: 'training', intensity: 'moderada' });
   const [creating, setCreating] = useState(false);
+  const [detailSession, setDetailSession] = useState(null);
 
   useEffect(() => {
     analyticsApi.dashboard().then((r) => setAnalytics(r.data)).catch(() => {});
@@ -58,6 +61,15 @@ export default function Dashboard() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const openCompletedSession = (session) => {
+    if (isMobileViewport()) {
+      navigate(`/post-session/${session.id}`);
+      return;
+    }
+
+    setDetailSession(session);
   };
 
   // Show first two words so "Dr. Silva" renders fully instead of just "Dr."
@@ -266,7 +278,7 @@ export default function Dashboard() {
                     session={s}
                     onClick={() =>
                       s.status === 'completed'
-                        ? navigate(`/post-session/${s.id}`)
+                        ? openCompletedSession(s)
                         : navigate(`/pre-session/${s.id}`)
                     }
                   />
@@ -276,6 +288,13 @@ export default function Dashboard() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Session detail modal */}
+      <SessionDetailModal
+        session={detailSession}
+        open={!!detailSession}
+        onClose={() => setDetailSession(null)}
+      />
 
       {/* New session modal */}
       <Modal open={showNewSession} onClose={() => setShowNewSession(false)} title="Nova Sessão">

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Ruler, Weight, Activity, Calendar, Save, Settings, LogOut } from 'lucide-react';
+import { User, Ruler, Weight, Activity, Calendar, Save, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { userApi } from '../services/api';
 import AppLayout from '../components/layout/AppLayout';
@@ -13,7 +12,6 @@ import { useToast } from '../components/ui/Toast';
 
 export default function Profile() {
   const { user, refetch, logout } = useAuth();
-  const navigate = useNavigate();
   const toast = useToast();
 
   const handleLogout = () => { logout(); window.location.href = '/'; };
@@ -88,22 +86,6 @@ export default function Profile() {
             </div>
           </motion.div>
 
-          {/* Mobile-only quick actions */}
-          <div className="flex gap-3 md:hidden">
-            <button
-              onClick={() => navigate('/settings')}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-white/60 hover:text-white transition-colors"
-            >
-              <Settings size={14} /> Configurações
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
-            >
-              <LogOut size={14} /> Sair da conta
-            </button>
-          </div>
-
           {/* Basic info */}
           <Card>
             <p className="section-title mb-4">Informações Pessoais</p>
@@ -177,6 +159,16 @@ export default function Profile() {
             icon={<Save size={16} />}>
             Salvar Perfil
           </Button>
+
+          <div className="md:hidden pb-2">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-surface-2 border border-primary/20 text-sm font-semibold text-primary hover:bg-primary hover:text-white active:bg-primary/80 active:text-white transition-colors"
+            >
+              <LogOut size={15} />
+              Sair da conta
+            </button>
+          </div>
         </div>
       </div>
     </AppLayout>

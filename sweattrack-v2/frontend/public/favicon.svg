@@ -1,4 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#111111"/>
-  <text x="16" y="22" font-family="Inter,sans-serif" font-size="18" font-weight="900" fill="#C41E3A" text-anchor="middle">S</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="45%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#1c0830"/>
+      <stop offset="100%" stop-color="#06040e"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="55%" r="50%">
+      <stop offset="0%" stop-color="#C41E3A" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#C41E3A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sColor" x1="0%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%" stop-color="#e8253f"/>
+      <stop offset="100%" stop-color="#9a1228"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App icon background (rounded square — standard iOS/Android shape) -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Subtle glow orb behind the S -->
+  <ellipse cx="256" cy="268" rx="175" ry="155" fill="url(#glow)"/>
+
+  <!-- Faint water-ripple rings (visible at larger icon sizes) -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#C41E3A" stroke-width="1.2" opacity="0.09"/>
+  <circle cx="256" cy="256" r="225" fill="none" stroke="#C41E3A" stroke-width="0.7" opacity="0.05"/>
+
+  <!-- Main S letter -->
+  <text x="260" y="368"
+    font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Arial, sans-serif"
+    font-weight="900" font-size="348" text-anchor="middle"
+    fill="url(#sColor)">S</text>
+
+  <!-- Creative element: sweat drop dripping from upper-right of the S -->
+  <polygon points="352,80 340,106 364,106" fill="#C41E3A" opacity="0.72"/>
+  <ellipse cx="352" cy="120" rx="14" ry="17" fill="#C41E3A" opacity="0.72"/>
+  <ellipse cx="346" cy="112" rx="4" ry="5" fill="white" opacity="0.18"/>
 </svg>

@@ -44,7 +44,7 @@ export default function Register() {
         password: form.password,
         role: form.role,
         clinicName: form.clinicName || undefined,
-        requestAdmin: form.role === 'doctor' ? form.requestAdmin : undefined,
+        requestAdmin: ['doctor', 'coach', 'nutritionist'].includes(form.role) ? form.requestAdmin : undefined,
       });
       toast('Conta criada com sucesso!', 'success');
       navigate('/dashboard');
@@ -71,11 +71,12 @@ export default function Register() {
         {/* Role selector */}
         <div className="mb-5">
           <label className="label">Tipo de conta</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {[
-              { val: 'athlete', label: 'Atleta', emoji: '🏃' },
-              { val: 'coach',   label: 'Treinador', emoji: '📋' },
-              { val: 'doctor',  label: 'Médico', emoji: '🩺' },
+              { val: 'athlete',      label: 'Atleta',       emoji: '🏃' },
+              { val: 'coach',        label: 'Treinador',    emoji: '📋' },
+              { val: 'doctor',       label: 'Médico',       emoji: '🩺' },
+              { val: 'nutritionist', label: 'Nutricionista', emoji: '🥗' },
             ].map(({ val, label, emoji }) => (
               <button
                 key={val}
@@ -112,7 +113,7 @@ export default function Register() {
             icon={<Mail size={16} />}
             error={errors.email}
           />
-          {(form.role === 'doctor' || form.role === 'coach') && (
+          {(form.role === 'doctor' || form.role === 'coach' || form.role === 'nutritionist') && (
             <Input
               label="Clínica / Instituição"
               placeholder="São Camilo Sports"
@@ -121,7 +122,7 @@ export default function Register() {
               icon={<Building2 size={16} />}
             />
           )}
-          {form.role === 'doctor' && (
+          {(form.role === 'doctor' || form.role === 'coach' || form.role === 'nutritionist') && (
             <button
               type="button"
               onClick={() => setForm((f) => ({ ...f, requestAdmin: !f.requestAdmin }))}
@@ -140,7 +141,7 @@ export default function Register() {
                 <div className="flex items-center gap-2">
                   <Shield size={14} className={form.requestAdmin ? 'text-primary' : 'text-white/30'} />
                   <p className={`text-sm font-semibold ${form.requestAdmin ? 'text-white' : 'text-white/50'}`}>
-                    Solicitar acesso de administrador
+                    Pedir para ser admin?
                   </p>
                 </div>
                 <p className="text-[11px] text-white/30 mt-0.5">

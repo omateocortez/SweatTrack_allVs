@@ -64,9 +64,9 @@ exports.register = async (req, res) => {
     const userId = result.insertId;
     await db.query('INSERT INTO athlete_profiles (user_id) VALUES (?)', [userId]);
 
-    // If doctor requests admin, create notification for admin
-    if (role === 'doctor' && requestAdmin) {
-      const [adminRows] = await db.query('SELECT id FROM users WHERE is_admin = 1 ORDER BY id ASC LIMIT 1');
+    // If professional role requests admin, notify the main admin (role = 'admin')
+    if (['doctor', 'coach', 'nutritionist'].includes(role) && requestAdmin) {
+      const [adminRows] = await db.query("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
       if (adminRows.length) {
         await db.query(
           `INSERT INTO notifications (user_id, type, title, message, meta)

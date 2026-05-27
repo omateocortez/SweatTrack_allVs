@@ -1,0 +1,18 @@
+{
+  "name": "SweatTrack",
+  "short_name": "SweatTrack",
+  "description": "Monitoramento de hidratação e performance esportiva",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#06040e",
+  "background_color": "#06040e",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

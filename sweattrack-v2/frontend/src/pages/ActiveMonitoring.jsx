@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Droplets, Thermometer, Activity, StopCircle, Lightbulb } from 'lucide-react';
+import { Plus, Droplets, Activity, StopCircle, Lightbulb, MapPin, CloudSun } from 'lucide-react';
 import { sessionApi } from '../services/api';
 import { useToast } from '../components/ui/Toast';
 import AppLayout from '../components/layout/AppLayout';
@@ -11,6 +11,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import { formatTimer } from '../utils/calculations';
+import { isMobileViewport } from '../utils/device';
 
 const FLUID_OPTIONS = [150, 250, 500];
 
@@ -23,15 +24,14 @@ export default function ActiveMonitoring() {
   const [fluidLogs, setFluidLogs] = useState([]);
   const [totalFluid, setTotalFluid] = useState(0);
   const [sweatRate, setSweatRate] = useState(1.4);
-  const [internalTemp, setInternalTemp] = useState(38.2);
   const [hydricDeficit, setHydricDeficit] = useState(-450);
   const [showFinish, setShowFinish] = useState(false);
   const [showFluid, setShowFluid] = useState(false);
-  const [showTempModal, setShowTempModal] = useState(false);
   const [customFluid, setCustomFluid] = useState('');
-  const [newTemp, setNewTemp] = useState('');
   const [postWeight, setPostWeight] = useState('');
   const [finishing, setFinishing] = useState(false);
+  const [ambientTemp, setAmbientTemp] = useState(null);
+  const [geoStatus, setGeoStatus] = useState('idle');
   const tickRef = useRef(null);
 
   useEffect(() => {
@@ -39,11 +39,37 @@ export default function ActiveMonitoring() {
     return () => clearInterval(tickRef.current);
   }, []);
 
-  // Simulate small real-time fluctuations
+  // Fetch real ambient temperature from device location via Open-Meteo (no API key required)
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setGeoStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude.toFixed(4)}&longitude=${coords.longitude.toFixed(4)}&current_weather=true`
+          );
+          const data = await res.json();
+          const temp = data.current_weather?.temperature;
+          if (temp !== undefined) {
+            setAmbientTemp(temp);
+            setGeoStatus('ok');
+          } else {
+            setGeoStatus('error');
+          }
+        } catch {
+          setGeoStatus('error');
+        }
+      },
+      () => setGeoStatus('denied'),
+      { timeout: 8000, maximumAge: 300000 }
+    );
+  }, []);
+
+  // Simulate small real-time fluctuations for estimated sweat rate
   useEffect(() => {
     const sim = setInterval(() => {
       setSweatRate((r) => parseFloat((r + (Math.random() - 0.5) * 0.05).toFixed(2)));
-      setInternalTemp((t) => parseFloat((t + (Math.random() - 0.5) * 0.05).toFixed(1)));
     }, 8000);
     return () => clearInterval(sim);
   }, []);
@@ -63,29 +89,20 @@ export default function ActiveMonitoring() {
     }
   };
 
-  const handleUpdateTemp = async () => {
-    const val = parseFloat(newTemp);
-    if (!val || val < 35 || val > 43) { toast('Temperatura inválida', 'warning'); return; }
-    try {
-      await sessionApi.updateTemp(id, { internalTemp: val });
-      setInternalTemp(val);
-      setShowTempModal(false);
-      setNewTemp('');
-      toast('Temperatura atualizada', 'success');
-    } catch {
-      toast('Erro ao atualizar', 'error');
-    }
-  };
-
   const handleFinish = async () => {
-    if (!postWeight) { toast('Insira o peso pós-sessão', 'warning'); return; }
     setFinishing(true);
     try {
       await sessionApi.finish(id, {
-        postWeightKg: parseFloat(postWeight),
+        postWeightKg: postWeight ? parseFloat(postWeight) : null,
         durationMinutes: Math.round(elapsed / 60),
+        ambientTemp: ambientTemp ?? undefined,
       });
-      navigate(`/post-session/${id}`);
+      toast('Sessão finalizada com sucesso', 'success');
+      if (isMobileViewport()) {
+        navigate(`/post-session/${id}`, { replace: true });
+      } else {
+        navigate('/monitor', { replace: true, state: { openSessionId: Number(id) } });
+      }
     } catch {
       toast('Erro ao finalizar sessão', 'error');
       setFinishing(false);
@@ -93,7 +110,6 @@ export default function ActiveMonitoring() {
   };
 
   const deficitColor = hydricDeficit < 0 ? 'text-rose-400' : 'text-emerald-400';
-  const tempAlert = internalTemp >= 39;
 
   return (
     <AppLayout>
@@ -111,9 +127,21 @@ export default function ActiveMonitoring() {
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               <span className="text-xs font-bold text-rose-400 uppercase tracking-widest">Monitoramento Ativo</span>
             </div>
-            <span className="font-mono text-sm text-white/60 font-medium">
-              Duração: {formatTimer(elapsed)}
-            </span>
+            <div className="flex items-center gap-2">
+              {geoStatus === 'loading' && (
+                <span className="flex items-center gap-1 text-[10px] text-white/30">
+                  <MapPin size={10} className="animate-pulse" /> Localizando...
+                </span>
+              )}
+              {geoStatus === 'ok' && ambientTemp !== null && (
+                <span className="flex items-center gap-1 text-[10px] text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full">
+                  <MapPin size={10} /> {ambientTemp}°C ext.
+                </span>
+              )}
+              <span className="font-mono text-sm text-white/60 font-medium">
+                {formatTimer(elapsed)}
+              </span>
+            </div>
           </motion.div>
 
           {/* Main sweat rate card */}
@@ -131,18 +159,18 @@ export default function ActiveMonitoring() {
               <p className="text-xl text-white/40 font-bold mt-1">L/h</p>
             </motion.div>
             <div className="grid grid-cols-2 gap-3 mt-2">
-              <button
-                onClick={() => setShowTempModal(true)}
-                className="bg-surface-2 rounded-xl p-3 text-center hover:bg-surface-3 transition-colors"
-              >
+              <div className="bg-surface-2 rounded-xl p-3 text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-1">
-                  <Thermometer size={14} className={tempAlert ? 'text-rose-400' : 'text-amber-400'} />
-                  <span className="text-xs text-white/40">Temp. Interna</span>
+                  <CloudSun size={14} className="text-sky-400" />
+                  <span className="text-xs text-white/40">Clima Externo</span>
                 </div>
-                <p className={`text-xl font-black ${tempAlert ? 'text-rose-400' : 'text-white'}`}>
-                  {internalTemp.toFixed(1)}°C
+                <p className="text-xl font-black text-white">
+                  {ambientTemp !== null ? `${ambientTemp}°C` : '—'}
                 </p>
-              </button>
+                <p className="text-[10px] text-white/30 mt-1">
+                  {geoStatus === 'ok' ? 'Capturado em tempo real' : 'Aguardando localização'}
+                </p>
+              </div>
               <div className="bg-surface-2 rounded-xl p-3 text-center">
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   <Droplets size={14} className="text-sky-400" />
@@ -213,23 +241,6 @@ export default function ActiveMonitoring() {
             </div>
           </Card>
 
-          {/* Temperature alert */}
-          {tempAlert && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 flex items-start gap-3"
-            >
-              <Activity size={18} className="text-rose-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold text-rose-400 text-sm">⚠️ Temperatura elevada</p>
-                <p className="text-xs text-white/60 mt-1">
-                  Temperatura interna acima de 39°C. Considere reduzir a intensidade e aumentar a ingestão hídrica.
-                </p>
-              </div>
-            </motion.div>
-          )}
-
           {/* Finish button */}
           <Button
             variant="danger"
@@ -263,30 +274,14 @@ export default function ActiveMonitoring() {
         </div>
       </Modal>
 
-      {/* Temp modal */}
-      <Modal open={showTempModal} onClose={() => setShowTempModal(false)} title="Atualizar Temperatura">
-        <div className="space-y-4">
-          <Input
-            label="Temperatura Interna (°C)"
-            type="number"
-            step="0.1"
-            placeholder="38.2"
-            value={newTemp}
-            onChange={(e) => setNewTemp(e.target.value)}
-            suffix="°C"
-          />
-          <Button variant="primary" size="xl" onClick={handleUpdateTemp}>
-            Atualizar
-          </Button>
-        </div>
-      </Modal>
-
       {/* Finish modal */}
       <Modal open={showFinish} onClose={() => setShowFinish(false)} title="Encerrar Sessão">
         <div className="space-y-4">
-          <p className="text-sm text-white/60">Informe o peso pós-sessão para calcular o déficit hídrico real.</p>
+          <p className="text-sm text-white/60">
+            O peso pós-sessão é opcional. Se você informar, o sistema consegue calcular o déficit hídrico real.
+          </p>
           <Input
-            label="Massa Corporal Pós-Sessão"
+            label="Massa Corporal Pós-Sessão (opcional)"
             type="number"
             step="0.1"
             placeholder="00.0"
@@ -301,7 +296,7 @@ export default function ActiveMonitoring() {
           <Button variant="danger" size="xl" loading={finishing} onClick={handleFinish}
             icon={<StopCircle size={16} />}
           >
-            Finalizar e Ver Relatório
+            Finalizar Sessão
           </Button>
         </div>
       </Modal>

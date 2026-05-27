@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Activity, CheckCircle2, Clock, ChevronRight, Zap } from 'lucide-react';
+import { Plus, Activity, Clock, ChevronRight, Zap } from 'lucide-react';
 import { sessionApi } from '../services/api';
 import AppLayout from '../components/layout/AppLayout';
 import Header from '../components/layout/Header';
@@ -9,7 +9,9 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import SessionCard from '../components/session/SessionCard';
+import SessionDetailModal from '../components/session/SessionDetailModal';
 import { useToast } from '../components/ui/Toast';
+import { isMobileViewport } from '../utils/device';
 
 const STEPS = [
   { emoji: '📋', title: 'Pré-Sessão', desc: 'Peso, cor da urina e nível de sede antes do treino.' },
@@ -21,6 +23,7 @@ const stagger = { animate: { transition: { staggerChildren: 0.07 } } };
 const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
 
 export default function Monitor() {
+  const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
   const [sessions, setSessions] = useState([]);
@@ -28,6 +31,7 @@ export default function Monitor() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ sessionType: 'training', intensity: 'moderada' });
   const [creating, setCreating] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
 
   useEffect(() => {
     sessionApi.list()
@@ -35,6 +39,15 @@ export default function Monitor() {
       .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!loaded || !location.state?.openSessionId || isMobileViewport()) return;
+
+    const target = sessions.find((session) => session.id === location.state.openSessionId);
+    if (target) {
+      setSelectedSession(target);
+    }
+  }, [loaded, location.state, sessions]);
 
   const activeSessions = sessions.filter((s) => s.status === 'pre' || s.status === 'active');
   const recentDone = sessions.filter((s) => s.status === 'completed').slice(0, 3);
@@ -51,6 +64,25 @@ export default function Monitor() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleSessionClick = (session) => {
+    if (session.status === 'completed') {
+      if (isMobileViewport()) {
+        navigate(`/post-session/${session.id}`);
+        return;
+      }
+
+      setSelectedSession(session);
+      return;
+    }
+
+    if (session.status === 'active') {
+      navigate(`/active/${session.id}`);
+      return;
+    }
+
+    navigate(`/pre-session/${session.id}`);
   };
 
   return (
@@ -96,11 +128,7 @@ export default function Monitor() {
                   <SessionCard
                     key={s.id}
                     session={s}
-                    onClick={() =>
-                      s.status === 'active'
-                        ? navigate(`/post-session/${s.id}`)
-                        : navigate(`/pre-session/${s.id}`)
-                    }
+                    onClick={() => handleSessionClick(s)}
                   />
                 ))}
               </div>
@@ -150,7 +178,7 @@ export default function Monitor() {
                   <SessionCard
                     key={s.id}
                     session={s}
-                    onClick={() => navigate(`/post-session/${s.id}`)}
+                    onClick={() => handleSessionClick(s)}
                   />
                 ))}
               </div>
@@ -226,6 +254,12 @@ export default function Monitor() {
           </Button>
         </div>
       </Modal>
+
+      <SessionDetailModal
+        session={selectedSession}
+        open={!!selectedSession}
+        onClose={() => setSelectedSession(null)}
+      />
     </AppLayout>
   );
 }

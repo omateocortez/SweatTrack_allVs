@@ -54,9 +54,13 @@ export default function Header({ title, showBack = false, actions }) {
         <div className="flex items-center gap-2">
           {actions}
           <NotificationPopup />
-          <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+          <button
+            onClick={() => navigate('/profile')}
+            className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 hover:bg-primary/30 transition-colors"
+            title="Meu perfil"
+          >
             {user?.name?.[0]?.toUpperCase() || 'U'}
-          </div>
+          </button>
         </div>
       </div>
     </header>
