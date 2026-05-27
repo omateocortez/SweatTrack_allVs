@@ -29,6 +29,32 @@ Antes de qualquer coisa, garante que tem isso instalado na sua máquina:
 
 ---
 
+## 🐍 Rodando a V1
+
+### 1️⃣ Banco de Dados
+
+```bash
+mysql -u root < database/schema.sql
+```
+
+### 2️⃣ Backend (Python)
+
+```bash
+cd backend
+cp .env.example .env   # edita com seus dados
+pip install -r requirements.txt
+python main.py
+```
+
+### 3️⃣ Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+---
+
 ## 🚀 Rodando a V2 (versão atual)
 
 ### 1️⃣ Banco de Dados
@@ -95,32 +121,6 @@ npm run dev
 | Email | `demo@sweattrack.com` |
 | Senha | `demo1234` |
 
----
-
-## 🐍 Rodando a V1 (legado)
-
-### 1️⃣ Banco de Dados
-
-```bash
-mysql -u root < database/schema.sql
-```
-
-### 2️⃣ Backend (Python)
-
-```bash
-cd backend
-cp .env.example .env   # edita com seus dados
-pip install -r requirements.txt
-python main.py
-```
-
-### 3️⃣ Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
 ---
 
 ## 🛠️ Comandos úteis
