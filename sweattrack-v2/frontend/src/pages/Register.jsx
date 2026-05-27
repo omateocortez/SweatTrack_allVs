@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Building2, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, Building2, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import Button from '../components/ui/Button';
@@ -14,7 +14,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', email: '', password: '', confirmPassword: '',
-    role: 'athlete', clinicName: '',
+    role: 'athlete', clinicName: '', requestAdmin: false,
   });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function Register() {
     const e = {};
     if (!form.name.trim()) e.name = 'Nome obrigatório';
     if (!form.email.includes('@')) e.email = 'Email inválido';
-    if (form.password.length < 6) e.password = 'Mínimo 6 caracteres';
+    if (form.password.length < 8) e.password = 'Mínimo 8 caracteres';
     if (form.password !== form.confirmPassword) e.confirmPassword = 'Senhas não coincidem';
     return e;
   };
@@ -44,6 +44,7 @@ export default function Register() {
         password: form.password,
         role: form.role,
         clinicName: form.clinicName || undefined,
+        requestAdmin: form.role === 'doctor' ? form.requestAdmin : undefined,
       });
       toast('Conta criada com sucesso!', 'success');
       navigate('/dashboard');
@@ -119,6 +120,34 @@ export default function Register() {
               onChange={set('clinicName')}
               icon={<Building2 size={16} />}
             />
+          )}
+          {form.role === 'doctor' && (
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, requestAdmin: !f.requestAdmin }))}
+              className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                form.requestAdmin
+                  ? 'bg-primary/10 border-primary/40'
+                  : 'bg-surface-2 border-border hover:border-border-bright'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                form.requestAdmin ? 'bg-primary border-primary' : 'border-white/20'
+              }`}>
+                {form.requestAdmin && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <Shield size={14} className={form.requestAdmin ? 'text-primary' : 'text-white/30'} />
+                  <p className={`text-sm font-semibold ${form.requestAdmin ? 'text-white' : 'text-white/50'}`}>
+                    Solicitar acesso de administrador
+                  </p>
+                </div>
+                <p className="text-[11px] text-white/30 mt-0.5">
+                  Um admin existente precisará aprovar sua solicitação.
+                </p>
+              </div>
+            </button>
           )}
           <div className="grid grid-cols-2 gap-3">
             <Input

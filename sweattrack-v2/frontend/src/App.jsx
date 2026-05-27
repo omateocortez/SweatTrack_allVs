@@ -16,12 +16,22 @@ import Monitor         from './pages/Monitor';
 import Notifications   from './pages/Notifications';
 import Profile         from './pages/Profile';
 import Settings        from './pages/Settings';
+import AdminUsers      from './pages/AdminUsers';
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  return children;
+}
+
+function RequireAdmin({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!user.isAdmin) return <Navigate to="/dashboard" replace />;
   return children;
 }
 
@@ -54,6 +64,9 @@ export default function App() {
         <Route path="/notifications"  element={<RequireAuth><Notifications /></RequireAuth>} />
         <Route path="/profile"        element={<RequireAuth><Profile /></RequireAuth>} />
         <Route path="/settings"       element={<RequireAuth><Settings /></RequireAuth>} />
+
+        {/* Admin */}
+        <Route path="/admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -69,3 +69,11 @@ export const userApi = {
   notifications: () => api.get('/users/notifications'),
   markRead: (id) => api.patch(`/users/notifications/${id}/read`),
 };
+
+// Admin
+export const adminApi = {
+  listUsers: () => api.get('/admin/users'),
+  toggleAdmin: (id) => api.patch(`/admin/users/${id}/toggle-admin`),
+  handleRequest: (notificationId, action) =>
+    api.post(`/admin/requests/${notificationId}/action`, { action }),
+};

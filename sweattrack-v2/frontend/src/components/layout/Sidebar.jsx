@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, LayoutGroup } from 'framer-motion';
 import {
   Home, Activity, BarChart3, User, Settings,
-  Utensils, History, LogOut, Bell,
+  Utensils, History, LogOut, Bell, Users,
 } from 'lucide-react';
 import Logo from './Logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,6 +26,8 @@ export default function Sidebar() {
 
   const handleLogout = () => { logout(); window.location.href = '/'; };
 
+  const adminNav = user?.isAdmin ? [{ to: '/admin/users', label: 'Usuários', icon: Users }] : [];
+
   return (
     <aside className="hidden md:flex flex-col w-64 bg-surface-1 border-r border-border h-screen sticky top-0 flex-shrink-0">
       {/* Logo */}
@@ -40,7 +42,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto no-scrollbar">
         <p className="section-title px-2 mb-3">Menu</p>
         <LayoutGroup id="sidebar-nav">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {[...NAV, ...adminNav].map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to}>
               {({ isActive }) => (
                 <motion.div
