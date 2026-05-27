@@ -121,22 +121,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
----
-
-## 📁 O que NÃO vai pro repositório
-
-Esses arquivos ficam só na sua máquina (estão no `.gitignore`):
-
-| Arquivo/Pasta | Motivo |
-|---|---|
-| `node_modules/` | Gerado com `npm install` |
-| `.env` | Suas credenciais locais — nunca sobe! |
-| `dist/` / `build/` | Gerado no build |
-| `.DS_Store` | Lixo do macOS 🍎 |
-
-> 💡 Os arquivos `.env.example` **sim** ficam no repo — servem de referência pra equipe saber o que preencher.
-
 ---
 
 ## 🛠️ Comandos úteis
