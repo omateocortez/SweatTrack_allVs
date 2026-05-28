@@ -23,3 +23,11 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Claude Code (local settings, memory — não committar)
+.claude/
+
+# Misc
+*.local
+coverage/
+.cache/

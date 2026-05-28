@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Weight, Thermometer, Wind } from 'lucide-react';
+import { Weight } from 'lucide-react';
 import { sessionApi } from '../services/api';
 import { useToast } from '../components/ui/Toast';
 import AppLayout from '../components/layout/AppLayout';
@@ -22,8 +22,6 @@ export default function PreSession() {
     preWeightKg: '',
     urineColor: null,
     thirstLevel: 5,
-    ambientTemp: '',
-    humidity: '',
   });
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -156,39 +154,6 @@ export default function PreSession() {
                   <span className="text-white font-bold text-sm">{form.thirstLevel}/10</span>
                   <span>10 — Sede extrema</span>
                 </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Environment (optional) */}
-          <motion.div variants={fadeUp}>
-            <Card>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
-                  <Thermometer size={18} className="text-sky-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm">Condições Ambientais</p>
-                  <p className="text-xs text-white/30">Temperatura e umidade (opcional)</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label="Temperatura"
-                  type="number"
-                  placeholder="24"
-                  value={form.ambientTemp}
-                  onChange={set('ambientTemp')}
-                  suffix="°C"
-                />
-                <Input
-                  label="Umidade"
-                  type="number"
-                  placeholder="65"
-                  value={form.humidity}
-                  onChange={set('humidity')}
-                  suffix="%"
-                />
               </div>
             </Card>
           </motion.div>
