@@ -70,17 +70,27 @@
   html:not(.dark) [class~="bg-primary"],
   html:not(.dark) [class~="bg-primary"] *,
   html:not(.dark) .btn-primary,
-  html:not(.dark) .btn-primary * {
+  html:not(.dark) .btn-primary *,
+  html:not(.dark) .bg-primary\/15,
+  html:not(.dark) .bg-primary\/15 *,
+  html:not(.dark) .bg-primary\/20,
+  html:not(.dark) .bg-primary\/20 *,
+  html:not(.dark) .bg-primary\/30,
+  html:not(.dark) .bg-primary\/30 *,
+  html:not(.dark) .bg-rose-600,
+  html:not(.dark) .bg-rose-600 *,
+  html:not(.dark) .bg-rose-700,
+  html:not(.dark) .bg-rose-700 * {
     color: #ffffff !important;
   }
-  /* Light mode reds should be solid tones, not washed translucent overlays */
-  html:not(.dark) .bg-primary\/3 { background-color: #ffe4e6 !important; }
-  html:not(.dark) .bg-primary\/5 { background-color: #fecdd3 !important; }
+  /* Light mode reds: subtle decorative backgrounds stay light; selected states become solid primary */
+  html:not(.dark) .bg-primary\/3  { background-color: #ffe4e6 !important; }
+  html:not(.dark) .bg-primary\/5  { background-color: #fecdd3 !important; }
   html:not(.dark) .bg-primary\/10 { background-color: #fda4af !important; }
   html:not(.dark) .bg-primary\/12 { background-color: #fb7185 !important; }
-  html:not(.dark) .bg-primary\/15 { background-color: #f43f5e !important; }
-  html:not(.dark) .bg-primary\/20 { background-color: #e11d48 !important; }
-  html:not(.dark) .bg-primary\/30 { background-color: #be123c !important; }
+  html:not(.dark) .bg-primary\/15 { background-color: #C41E3A !important; }
+  html:not(.dark) .bg-primary\/20 { background-color: #a81932 !important; }
+  html:not(.dark) .bg-primary\/30 { background-color: #881337 !important; }
   html:not(.dark) .bg-rose-500\/5 { background-color: #ffe4e6 !important; }
   html:not(.dark) .bg-rose-500\/10 { background-color: #fecdd3 !important; }
   html:not(.dark) .bg-rose-500\/15 { background-color: #fda4af !important; }
