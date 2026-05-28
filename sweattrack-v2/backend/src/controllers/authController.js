@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const db = require('../config/database');
 
-const ALLOWED_ROLES = new Set(['athlete', 'coach', 'doctor', 'nutritionist']);
+const ALLOWED_ROLES = new Set(['athlete', 'coach']);
 
 const signToken = (userId, role, isAdmin) =>
   jwt.sign({ userId, role, isAdmin: !!isAdmin }, process.env.JWT_SECRET, {
@@ -65,7 +65,7 @@ exports.register = async (req, res) => {
     await db.query('INSERT INTO athlete_profiles (user_id) VALUES (?)', [userId]);
 
     // If professional role requests admin, notify the main admin (role = 'admin')
-    if (['doctor', 'coach', 'nutritionist'].includes(role) && requestAdmin) {
+    if (role === 'coach' && requestAdmin) {
       const [adminRows] = await db.query("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
       if (adminRows.length) {
         await db.query(

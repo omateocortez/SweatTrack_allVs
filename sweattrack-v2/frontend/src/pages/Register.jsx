@@ -44,7 +44,7 @@ export default function Register() {
         password: form.password,
         role: form.role,
         clinicName: form.clinicName || undefined,
-        requestAdmin: ['doctor', 'coach', 'nutritionist'].includes(form.role) ? form.requestAdmin : undefined,
+        requestAdmin: form.role === 'coach' ? form.requestAdmin : undefined,
       });
       toast('Conta criada com sucesso!', 'success');
       navigate('/dashboard');
@@ -73,10 +73,8 @@ export default function Register() {
           <label className="label">Tipo de conta</label>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { val: 'athlete',      label: 'Atleta',       emoji: '🏃' },
-              { val: 'coach',        label: 'Treinador',    emoji: '📋' },
-              { val: 'doctor',       label: 'Médico',       emoji: '🩺' },
-              { val: 'nutritionist', label: 'Nutricionista', emoji: '🥗' },
+              { val: 'athlete', label: 'Atleta',    emoji: '🏃' },
+              { val: 'coach',   label: 'Treinador', emoji: '📋' },
             ].map(({ val, label, emoji }) => (
               <button
                 key={val}
@@ -113,7 +111,7 @@ export default function Register() {
             icon={<Mail size={16} />}
             error={errors.email}
           />
-          {(form.role === 'doctor' || form.role === 'coach' || form.role === 'nutritionist') && (
+          {form.role === 'coach' && (
             <Input
               label="Clínica / Instituição"
               placeholder="São Camilo Sports"
@@ -122,7 +120,7 @@ export default function Register() {
               icon={<Building2 size={16} />}
             />
           )}
-          {(form.role === 'doctor' || form.role === 'coach' || form.role === 'nutritionist') && (
+          {form.role === 'coach' && (
             <button
               type="button"
               onClick={() => setForm((f) => ({ ...f, requestAdmin: !f.requestAdmin }))}
